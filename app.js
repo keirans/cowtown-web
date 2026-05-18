@@ -57,20 +57,27 @@ function renderHeader(metadata) {
 }
 
 // ── Time formatting ─────────────────────────────────────────────
-// Converts "HH:MM UTC (YYYY-MM-DD)" to a Perth (AWST, UTC+8) time string.
-// Returns the original value unchanged if it doesn't match the pattern.
-const UTC_TIME_RE = /^(\d{2}:\d{2}) UTC \((\d{4}-\d{2}-\d{2})\)$/;
+// Perth is AWST = UTC+8, no DST.
+const UTC_TIME_RE  = /^(\d{2}:\d{2}) UTC \((\d{4}-\d{2}-\d{2})\)$/;
+const UTC_RANGE_RE = /^(\d{2}:\d{2})[–-](\d{2}:\d{2}) UTC$/;
 
-function formatAsPerth(value) {
-  const match = value.match(UTC_TIME_RE);
-  if (!match) return value;
-  const [, time, date] = match;
-  return new Date(`${date}T${time}:00Z`).toLocaleTimeString('en-AU', {
+function toPerth12h(utcTimeStr, refDate = '2000-01-01') {
+  return new Date(`${refDate}T${utcTimeStr}:00Z`).toLocaleTimeString('en-AU', {
     timeZone: 'Australia/Perth',
     hour:     'numeric',
     minute:   '2-digit',
     hour12:   true,
   });
+}
+
+function formatAsPerth(value) {
+  const single = value.match(UTC_TIME_RE);
+  if (single) return toPerth12h(single[1], single[2]);
+
+  const range = value.match(UTC_RANGE_RE);
+  if (range) return `${toPerth12h(range[1])} – ${toPerth12h(range[2])}`;
+
+  return value;
 }
 
 const PERTH_TIME_LABELS = new Set(['Sunrise', 'Sunset', 'UV Active Period']);
