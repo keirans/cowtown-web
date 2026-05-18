@@ -22,6 +22,10 @@ body {
   --tint-info:    #eff6ff;
   --tint-warning: #fffbeb;
   --tint-danger:  #fef2f2;
+
+  /* Bin colour palette (distinct from status levels) */
+  --color-bin-yellow: #eab308;  /* true yellow — recyclables bin */
+  --tint-bin-yellow:  #fefce8;
 }
 
 /* ── Site header ──────────────────────────────────────────────── */
@@ -112,6 +116,10 @@ main {
 .card.status-warning { border-left: 4px solid var(--color-warning);  }
 .card.status-danger  { border-left: 4px solid var(--color-danger);   }
 
+/* Bin colour overrides (applied alongside status class on waste_collection) */
+.card.bin-yellow { border-left: 4px solid var(--color-bin-yellow); }
+.card.bin-red    { border-left: 4px solid var(--color-danger);     }
+
 /* ── Card header ──────────────────────────────────────────────── */
 .card-header {
   padding: .6rem .9rem;
@@ -125,6 +133,9 @@ main {
 .card.status-info    .card-header { background: var(--tint-info);     }
 .card.status-warning .card-header { background: var(--tint-warning);  }
 .card.status-danger  .card-header { background: var(--tint-danger);   }
+
+.card.bin-yellow .card-header { background: var(--tint-bin-yellow); }
+.card.bin-red    .card-header { background: var(--tint-danger);     }
 
 .card-header h2 {
   font-size: 1rem;

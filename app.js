@@ -56,6 +56,17 @@ function renderHeader(metadata) {
   document.getElementById('data-timestamp').textContent = `Updated ${formatted}`;
 }
 
+// ── Module-specific badge helpers ───────────────────────────────
+
+function getAlertBadgeText(module) {
+  return module.badge ? module.badge.toUpperCase() : module.status.toUpperCase();
+}
+
+function getBinColourClass(module) {
+  const colour = module.display_data?.accent_color;
+  return colour ? `bin-${colour.toLowerCase()}` : null;
+}
+
 // ── Card renderers ──────────────────────────────────────────────
 
 function makeCard(module) {
@@ -127,10 +138,15 @@ function renderKvMetrics(module) {
 function renderAlertStatus(module) {
   const card = makeCard(module);
 
+  if (module.module_id === 'waste_collection') {
+    const binClass = getBinColourClass(module);
+    if (binClass) card.classList.add(binClass);
+  }
+
   const header = makeCardHeader(module);
   const badge = document.createElement('span');
   badge.className = 'status-badge';
-  badge.textContent = module.status.toUpperCase();
+  badge.textContent = getAlertBadgeText(module);
   header.appendChild(badge);
   card.appendChild(header);
 
