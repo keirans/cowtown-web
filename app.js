@@ -72,10 +72,10 @@ function toPerth12h(utcTimeStr, refDate = '2000-01-01') {
 
 function formatAsPerth(value) {
   const single = value.match(UTC_TIME_RE);
-  if (single) return toPerth12h(single[1], single[2]);
+  if (single) return `${toPerth12h(single[1], single[2])} AWST`;
 
   const range = value.match(UTC_RANGE_RE);
-  if (range) return `${toPerth12h(range[1])} – ${toPerth12h(range[2])}`;
+  if (range) return `${toPerth12h(range[1])} – ${toPerth12h(range[2])} AWST`;
 
   return value;
 }
