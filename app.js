@@ -159,8 +159,33 @@ function renderBanner(module) {
 
   const body = makeCardBody();
   body.appendChild(makeSummary(module.summary));
-  card.appendChild(body);
 
+  if (module.metrics && module.metrics.length > 0) {
+    const table = document.createElement('table');
+    table.className = 'metrics-table';
+    const tbody = document.createElement('tbody');
+
+    for (const { label, value } of module.metrics) {
+      const row = document.createElement('tr');
+
+      const labelCell = document.createElement('td');
+      labelCell.className = 'metric-label';
+      labelCell.textContent = label;
+
+      const valueCell = document.createElement('td');
+      valueCell.className = 'metric-value';
+      valueCell.textContent = value;
+
+      row.appendChild(labelCell);
+      row.appendChild(valueCell);
+      tbody.appendChild(row);
+    }
+
+    table.appendChild(tbody);
+    body.appendChild(table);
+  }
+
+  card.appendChild(body);
   return card;
 }
 
