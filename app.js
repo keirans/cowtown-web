@@ -56,6 +56,22 @@ function renderHeader(metadata) {
   document.getElementById('data-timestamp').textContent = `Updated ${formatted}`;
 }
 
+// ── Metric row extraction ────────────────────────────────────────
+// Returns [{label, value}] from module.metrics (old schema) or by
+// splitting module.bullet_points on ": " (new schema, kv_metrics only).
+function getMetricRows(module) {
+  if (module.metrics?.length > 0) return module.metrics;
+  if (module.bullet_points?.length > 0) {
+    return module.bullet_points.map(s => {
+      const idx = s.indexOf(': ');
+      return idx !== -1
+        ? { label: s.slice(0, idx), value: s.slice(idx + 2) }
+        : { label: s, value: '' };
+    });
+  }
+  return [];
+}
+
 // ── Module-specific badge helpers ───────────────────────────────
 
 function getAlertBadgeText(module) {
@@ -106,12 +122,13 @@ function renderKvMetrics(module) {
   const body = makeCardBody();
   body.appendChild(makeSummary(module.summary));
 
-  if (module.metrics && module.metrics.length > 0) {
+  const rows = getMetricRows(module);
+  if (rows.length > 0) {
     const table = document.createElement('table');
     table.className = 'metrics-table';
     const tbody = document.createElement('tbody');
 
-    for (const { label, value } of module.metrics) {
+    for (const { label, value } of rows) {
       const row = document.createElement('tr');
 
       const labelCell = document.createElement('td');
@@ -176,12 +193,13 @@ function renderBanner(module) {
   const body = makeCardBody();
   body.appendChild(makeSummary(module.summary));
 
-  if (module.metrics && module.metrics.length > 0) {
+  const rows = getMetricRows(module);
+  if (rows.length > 0) {
     const table = document.createElement('table');
     table.className = 'metrics-table';
     const tbody = document.createElement('tbody');
 
-    for (const { label, value } of module.metrics) {
+    for (const { label, value } of rows) {
       const row = document.createElement('tr');
 
       const labelCell = document.createElement('td');
