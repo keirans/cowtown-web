@@ -56,6 +56,25 @@ function renderHeader(metadata) {
   document.getElementById('data-timestamp').textContent = `Updated ${formatted}`;
 }
 
+// ── Time formatting ─────────────────────────────────────────────
+// Converts "HH:MM UTC (YYYY-MM-DD)" to a Perth (AWST, UTC+8) time string.
+// Returns the original value unchanged if it doesn't match the pattern.
+const UTC_TIME_RE = /^(\d{2}:\d{2}) UTC \((\d{4}-\d{2}-\d{2})\)$/;
+
+function formatAsPerth(value) {
+  const match = value.match(UTC_TIME_RE);
+  if (!match) return value;
+  const [, time, date] = match;
+  return new Date(`${date}T${time}:00Z`).toLocaleTimeString('en-AU', {
+    timeZone: 'Australia/Perth',
+    hour:     'numeric',
+    minute:   '2-digit',
+    hour12:   true,
+  });
+}
+
+const PERTH_TIME_LABELS = new Set(['Sunrise', 'Sunset', 'UV Active Period']);
+
 // ── Metric row extraction ────────────────────────────────────────
 // Returns [{label, value}] from module.metrics (old schema) or by
 // splitting module.bullet_points on ": " (new schema, kv_metrics only).
@@ -147,7 +166,7 @@ function renderKvMetrics(module) {
 
       const valueCell = document.createElement('td');
       valueCell.className = 'metric-value';
-      valueCell.textContent = value;
+      valueCell.textContent = PERTH_TIME_LABELS.has(label) ? formatAsPerth(value) : value;
 
       row.appendChild(labelCell);
       row.appendChild(valueCell);
