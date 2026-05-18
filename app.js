@@ -74,13 +74,23 @@ function getMetricRows(module) {
 
 // ── Module-specific badge helpers ───────────────────────────────
 
-function getAlertBadgeText(module) {
-  return module.badge ? module.badge.toUpperCase() : module.status.toUpperCase();
+function getFireBadgeText(module) {
+  const metric = module.metrics?.find(m => m.label === 'Fire Danger Rating');
+  return metric ? metric.value.toUpperCase() : module.status.toUpperCase();
+}
+
+function getBinBadgeText(module) {
+  const metric = module.metrics?.find(m => m.label === 'Weekly Collection');
+  if (!metric) return module.status.toUpperCase();
+  const type = metric.value.split(' (')[0];
+  return type ? type.toUpperCase() : module.status.toUpperCase();
 }
 
 function getBinColourClass(module) {
-  const colour = module.display_data?.accent_color;
-  return colour ? `bin-${colour.toLowerCase()}` : null;
+  const metric = module.metrics?.find(m => m.label === 'Weekly Collection');
+  if (!metric) return null;
+  const match = metric.value.match(/\((\w+)\)/);
+  return match ? `bin-${match[1].toLowerCase()}` : null;
 }
 
 // ── Card renderers ──────────────────────────────────────────────
@@ -163,7 +173,15 @@ function renderAlertStatus(module) {
   const header = makeCardHeader(module);
   const badge = document.createElement('span');
   badge.className = 'status-badge';
-  badge.textContent = getAlertBadgeText(module);
+
+  if (module.module_id === 'fire_management') {
+    badge.textContent = getFireBadgeText(module);
+  } else if (module.module_id === 'waste_collection') {
+    badge.textContent = getBinBadgeText(module);
+  } else {
+    badge.textContent = module.status.toUpperCase();
+  }
+
   header.appendChild(badge);
   card.appendChild(header);
 

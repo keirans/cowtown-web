@@ -14,29 +14,33 @@ context: |
       - `dev/data.json` - Non-production payload for testing workflow or prompt upgrades.
     - All data fetches must append a cache-busting parameter (e.g., `data.json?t=${Date.now()}`) to bypass the GitHub CDN's strict 5-minute edge cache.
 
-  JSON Data Schema Specifications:
-    The payload follows a rigid global envelope with a highly flexible, component-driven interior:
-    
-    1. Metadata Envelope (`metadata`):
-       - `schema_version`: Strict semantic versioning string (current version: `"1.0.0"`).
-       - `generated_at`: ISO 8601 UTC timestamp of the n8n data generation execution.
-       - `location`: Structured object declaring `name` (e.g., "Cowaramup"), `postcode` ("6284"), and `region` ("Shire of Augusta Margaret River").
+  JSON Data Schema Specifications (LocationBriefingSchema):
+    The payload has a fixed two-key envelope — `metadata` and `modules` — both required.
+
+    1. Metadata Envelope (`metadata`) — all fields required:
+       - `schema_version`: Semantic version string of the schema in use (e.g., `"1.0.0"`).
+       - `generated_at`: ISO 8601 timestamp with timezone of the n8n generation execution.
+       - `location`: Object with three required string fields: `name` (e.g., "Cowaramup"),
+         `postcode` (e.g., "6284"), and `region` (e.g., "Shire of Augusta Margaret River").
 
     2. Polymorphic Modules Array (`modules`):
-       An array of self-contained UI components. The frontend loops through this collection dynamically, rendering cards based on the `type` discriminator:
-       
-       - Type `kv_metrics`: Renders data points as an array of structured key-value pairs (e.g., weather indices, temperatures, or sunrise/sunset timestamps).
-       - Type `alert_status`: Renders high-priority, conditional compliance information with highlighted status headers and explicit procedural check-lists.
-       - Type `banner`: Renders high-level, persistent daily information banners.
+       An array of objects. The frontend renders each as a card based on the `type` discriminator:
+       - Type `kv_metrics`: Key-value data table (e.g., weather indices, temperatures).
+       - Type `alert_status`: High-priority compliance card with status badge and checklist.
+       - Type `banner`: Full-width persistent information strip.
 
-    3. Common Module Fields (Required on all objects inside `modules`):
-       - `module_id`: Unique snake_case string (e.g., `"weather_daily"`, `"fire_danger_daily"`, `"waste_collection"`).
-       - `type`: Exact string indicator matching `"kv_metrics"`, `"alert_status"`, or `"banner"`.
+    3. Required Module Fields (all required on every object in `modules`):
+       - `module_id`: Unique snake_case string (e.g., `"weather_daily"`, `"waste_collection"`).
+       - `type`: One of `"kv_metrics"`, `"alert_status"`, or `"banner"`.
        - `title`: User-facing display title for the card header.
-       - `status`: Structural urgency level. Must be exactly one of: `"normal"`, `"info"`, `"warning"`, `"danger"`.
-       - `summary`: A detailed plain-text paragraph synthesizing the current state.
-       - `metrics`: Array of objects containing `{"label": "String", "value": "String"}`. Must be an empty array `[]` if unused.
-       - `bullet_points`: Array of plain strings used for requirements or logic breakdowns. Must be an empty array `[]` if unused.
+       - `status`: Urgency level — exactly one of `"normal"`, `"info"`, `"warning"`, `"danger"`.
+       - `summary`: Plain-text paragraph summarising the module's current state.
+       - `metrics`: Array of `{"label": String, "value": String}` objects. Use `[]` if unused.
+       - `bullet_points`: Array of plain strings for actionable notes or restrictions. Use `[]` if unused.
+
+    IMPORTANT — fields NOT in the schema: `badge`, `display_data`, `icon`, `live_state` and
+    any other fields beyond the seven listed above are not part of the contract and must not
+    be relied upon in frontend logic or spec requirements.
 
   Domain Rules & Business Logic:
     - Weather Data: Tracks structural metrics including max/min temperatures, rain probability percentages, descriptive likelihood scales, UV indices, and UTC-based astronomical times.
