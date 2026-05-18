@@ -57,7 +57,12 @@ function renderHeader(metadata) {
 }
 
 // ── Time formatting ─────────────────────────────────────────────
-// Perth is AWST = UTC+8, no DST.
+// Perth is AWST = UTC+8, no DST. All time values from the data are UTC.
+// Supported formats:
+//   "HH:MM"                       bare UTC time (current schema)
+//   "HH:MM UTC (YYYY-MM-DD)"      UTC time with date
+//   "HH:MM–HH:MM UTC"             UTC time range
+const UTC_BARE_RE  = /^(\d{2}:\d{2})$/;
 const UTC_TIME_RE  = /^(\d{2}:\d{2}) UTC \((\d{4}-\d{2}-\d{2})\)$/;
 const UTC_RANGE_RE = /^(\d{2}:\d{2})[–-](\d{2}:\d{2}) UTC$/;
 
@@ -71,6 +76,9 @@ function toPerth12h(utcTimeStr, refDate = '2000-01-01') {
 }
 
 function formatAsPerth(value) {
+  const bare = value.match(UTC_BARE_RE);
+  if (bare) return `${toPerth12h(bare[1])} AWST`;
+
   const single = value.match(UTC_TIME_RE);
   if (single) return `${toPerth12h(single[1], single[2])} AWST`;
 
