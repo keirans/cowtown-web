@@ -1,0 +1,45 @@
+schema: spec-driven
+
+# Project context
+# This is shown to AI when creating artifacts.
+context: |
+  Tech Stack:
+    - Frontend: Vanilla JavaScript (ES6+), HTML5, CSS3
+    - Hosting: GitHub Pages (Static Site Hosting)
+    - Data Sourcing: Decoupled architecture. Frontend fetches JSON state payloads via HTTP from a separate, public data repository using the GitHub Raw CDN (`raw.githubusercontent.com`).
+
+  Environments & Namespaces:
+    - Data files are split by environment directory:
+      - `live/data.json` - Production payload for the live site.
+      - `dev/data.json` - Non-production payload for testing workflow or prompt upgrades.
+    - All data fetches must append a cache-busting parameter (e.g., `data.json?t=${Date.now()}`) to bypass the GitHub CDN's strict 5-minute edge cache.
+
+  JSON Data Schema Specifications:
+    The payload follows a rigid global envelope with a highly flexible, component-driven interior:
+    
+    1. Metadata Envelope (`metadata`):
+       - `schema_version`: Strict semantic versioning string (current version: `"1.0.0"`).
+       - `generated_at`: ISO 8601 UTC timestamp of the n8n data generation execution.
+       - `location`: Structured object declaring `name` (e.g., "Cowaramup"), `postcode` ("6284"), and `region` ("Shire of Augusta Margaret River").
+
+    2. Polymorphic Modules Array (`modules`):
+       An array of self-contained UI components. The frontend loops through this collection dynamically, rendering cards based on the `type` discriminator:
+       
+       - Type `kv_metrics`: Renders data points as an array of structured key-value pairs (e.g., weather indices, temperatures, or sunrise/sunset timestamps).
+       - Type `alert_status`: Renders high-priority, conditional compliance information with highlighted status headers and explicit procedural check-lists.
+       - Type `banner`: Renders high-level, persistent daily information banners.
+
+    3. Common Module Fields (Required on all objects inside `modules`):
+       - `module_id`: Unique snake_case string (e.g., `"weather_daily"`, `"fire_danger_daily"`, `"waste_collection"`).
+       - `type`: Exact string indicator matching `"kv_metrics"`, `"alert_status"`, or `"banner"`.
+       - `title`: User-facing display title for the card header.
+       - `status`: Structural urgency level. Must be exactly one of: `"normal"`, `"info"`, `"warning"`, `"danger"`.
+       - `summary`: A detailed plain-text paragraph synthesizing the current state.
+       - `metrics`: Array of objects containing `{"label": "String", "value": "String"}`. Must be an empty array `[]` if unused.
+       - `bullet_points`: Array of plain strings used for requirements or logic breakdowns. Must be an empty array `[]` if unused.
+
+  Domain Rules & Business Logic:
+    - Weather Data: Tracks structural metrics including max/min temperatures, rain probability percentages, descriptive likelihood scales, UV indices, and UTC-based astronomical times.
+    - Fire Pit Safety & Burn Restrictions: Evaluates live daily fire danger codes (e.g., "Moderate") against regional seasonal calendar boundaries (such as the "Restricted Burning Period"). Clearly declares if campfires/firepits are allowed and structures local safety criteria inside the `bullet_points`.
+    - Alternating Bin Calculations: Green FOGO organics are flagged as weekly. The alternating fortnightly bin (Yellow Recyclables vs. Red Landfill) uses an anchor reference point of Monday, 30 June 2025 (declared as a Recyclables week). The engine applies an even/odd calculation based on elapsed weeks from this baseline.
+    - Defensive UI Processing: If an error or an incomplete execution context prevents calculations, values must gracefully degrade into descriptive fallback error strings (e.g., `"Unable to determine—no current execution date provided"`) instead of outputting blank, null, or broken primitives.

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cowtown — Daily Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="site-header">
+    <div class="header-inner">
+      <h1 id="location-name">Cowtown</h1>
+      <p id="data-timestamp" class="timestamp"></p>
+    </div>
+  </header>
+
+  <main>
+    <div id="schema-warning" class="banner-notice warning" hidden>
+      Data schema version mismatch — display may be incomplete.
+    </div>
+
+    <div id="error-banner" class="banner-notice danger" hidden>
+      <strong>Could not load data.</strong>
+      <span id="error-detail"></span>
+      <span>Please refresh the page to try again.</span>
+    </div>
+
+    <div id="cards"></div>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
